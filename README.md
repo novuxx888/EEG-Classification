@@ -6,36 +6,39 @@ Practice project for classifying EEG thought patterns (motor imagery).
 
 | Classifier | Accuracy |
 |------------|----------|
-| ExtraTrees | **77%** |
-| SVM-RBF | 75% |
-| GradientBoosting | 75% |
-| RandomForest | 73% |
-| XGBoost | 73% |
-| Ensemble | 73% |
-| LogisticRegression | 67% |
-| EEGNet | 65% |
-| LDA | 58% |
+| **SVM-RBF (FBCSP)** | **81%** ← NEW! |
+| RandomForest | 80% |
+| ExtraTrees | 80% |
+| GradientBoosting | 80% |
+| XGBoost | 80% |
+| Ensemble | 80% |
+| LogisticRegression | 79% |
+| LightGBM | 79% |
+| EEGNet | 76% |
+| LDA | 66% |
 
-**Cross-validation (5-fold):** RF: 83.3% ± 3.0%, SVM: 82.3% ± 2.0%, Ensemble: 81.3% ± 2.7%
+**Cross-validation (5-fold):** RF: 82.3% ± 5.2%, SVM: 81.4% ± 5.4%, Ensemble: 82.3% ± 5.3%, LightGBM: 79.7% ± 5.5%
 
 ## Latest Scripts
 
-- `motor_imagery_final_v3.py` - **Best balanced version** (77% accuracy)
-- `motor_imagery_final_v2.py` - Hardest version (65% accuracy)
-- `motor_imagery_optimized.py` - Previous optimized version
+- `motor_imagery_fbcsp_balanced.py` - **Best: 81% accuracy (NEW!)** ← Run this!
+- `motor_imagery_fbcsp.py` - Hard version (70% accuracy)
+- `motor_imagery_final_v3.py` - Previous best (77% accuracy)
 
 ## Methods Implemented
 
 ### Features
+- **FBCSP (Filter Bank CSP)** - Multiple bands: mu (8-13 Hz), beta1 (13-20 Hz), beta2 (20-30 Hz)
 - **CSP (Common Spatial Patterns)** - mu band (8-13 Hz) + beta band (13-30 Hz)
 - Frequency band features (alpha, beta, theta, delta powers)
 - Hemisphere asymmetry features
 - Time domain features (mean, std, max, IQR)
 
 ### Classifiers
-- SVM-RBF (tuned C, gamma)
-- RandomForest, ExtraTrees (400 trees)
-- XGBoost (with libomp)
+- SVM-RBF (tuned C, gamma) ← **Best performer!**
+- RandomForest, ExtraTrees (400-500 trees)
+- XGBoost
+- LightGBM (NEW!)
 - Gradient Boosting
 - Logistic Regression, LDA
 - Voting Ensemble
@@ -70,11 +73,11 @@ Hard version (more challenging):
 ## Running
 
 ```bash
-# Best balanced version
-python3 motor_imagery_final_v3.py
+# New best (81% accuracy!)
+python3 motor_imagery_fbcsp_balanced.py
 
-# Hardest version
-python3 motor_imagery_final_v2.py
+# Hard version (70% accuracy)
+python3 motor_imagery_fbcsp.py
 ```
 
 ## Next Goals
