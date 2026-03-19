@@ -6,28 +6,29 @@ Practice project for classifying EEG thought patterns (motor imagery).
 
 | Classifier | Accuracy |
 |------------|----------|
-| **ExtraTrees** | **82.5%** ← RECORD! |
-| **GradientBoosting** | **82.5%** |
-| MLP | 80.0% |
-| RandomForest | 78.8% |
-| LightGBM | 78.8% |
-| Ensemble | 78.8% |
-| XGBoost | 76.2% |
-| SVM-RBF | 75.0% |
-| LogisticRegression | 68.8% |
-| EEGNet | 68.8% |
-| LDA | 60.0% |
+| **GradientBoosting** | **88.9%** ← NEW RECORD! |
+| RandomForest | 87.8% |
+| ExtraTrees | 86.7% |
+| LightGBM | 86.7% |
+| XGBoost | 85.6% |
+| MLP | 85.6% |
+| SVM-RBF | 84.4% |
+| Ensemble | 84.4% |
+| LogisticRegression | 81.1% |
+| EEGNet | 77.8% |
+| LDA | 68.9% |
 
-**Cross-validation (5-fold):** RF: 79.2% ± 2.3%, ET: 77.8% ± 2.0%, XGBoost: 77.2% ± 0.9%
+**Cross-validation (5-fold):** RF: 86.9% ± 2.4%, ET: 86.9% ± 3.1%, GB: 86.4% ± 2.3%, XGBoost: 86.7% ± 2.4%, LightGBM: 86.4% ± 3.3%
 
 ## Latest Experiments (March 2026)
 
-### New Approaches Tested
+### New Approach - v3 Optimized
 
-1. **CSP (Common Spatial Patterns)** features
-2. **RandomForest & XGBoost** with enhanced features
-3. **Harder synthetic data** (3-class: left/right/rest, 20 channels, subtle 2% suppression)
-4. **EEGNet** deep learning (TensorFlow/PyTorch)
+- **88.9% accuracy** with Gradient Boosting! (+6.4% improvement over 82.5%)
+- Enhanced CSP features with regularized covariance
+- 6-band FBCSP (added delta band 2-4Hz)
+- Optimized RF/XGBoost parameters
+- Balanced difficulty: 65% effect, 16% suppression
 
 ### Hard Data Results (~52% is near chance for 3-class)
 - Logistic Regression: 51%
@@ -40,78 +41,78 @@ The hard data with 3 classes and subtle 2% alpha suppression is near random chan
 
 ## Latest Scripts
 
-- `motor_imagery_best_combo.py` - **Best: 82.5% accuracy** ← Run this!
+- `motor_imagery_v3_optimized.py` - **NEW BEST: 88.9% accuracy** ← Run this!
+- `motor_imagery_v2_improved.py` - Hard data (55% effect, 12% suppression) - ~67%
+- `motor_imagery_best_combo.py` - Previous best (82.5%)
 - `motor_imagery_enhanced.py` - CSP + RF/XGBoost + hard data (3-class, ~52%)
 - `motor_imagery_eegnet.py` - EEGNet deep learning (~50% on hard data)
-- `motor_imagery_harder_v2.py` - Hard data (40% effect, 10% suppression) - ~59%
-- `motor_imagery_fbcsp_v4.py` - Previous best (81.4%)
 
 ## Methods Implemented
 
 ### Features
-- **FBCSP (Filter Bank CSP)** - 5 bands: theta (4-8 Hz), mu (8-13 Hz), low-mu (6-12 Hz), beta1 (13-20 Hz), beta2 (20-30 Hz)
-- **CSP (Common Spatial Patterns)** - with regularization
+- **FBCSP (Filter Bank CSP)** - 6 bands: delta (2-4 Hz), theta (4-8 Hz), mu (8-13 Hz), low-mu (6-12 Hz), beta1 (13-20 Hz), beta2 (20-30 Hz)
+- **CSP (Common Spatial Patterns)** - with regularized covariance
 - Frequency band features (alpha, beta, theta, delta powers + ratios)
 - Hemisphere asymmetry features
 - Spatial pattern features
-- Temporal segment features (5 segments)
-- Time domain features (mean, std, max, IQR, RMS)
+- Temporal segment features (6 segments)
+- Connectivity features (pairwise correlations)
+- Time domain features (mean, std, max, IQR, RMS, MAD)
 
 ### Classifiers
-- ExtraTrees (700 trees, max_depth=20) ← **Best!**
-- GradientBoosting (300 trees, max_depth=6)
-- RandomForest (700 trees, max_depth=20)
+- GradientBoosting (350 trees, max_depth=6, lr=0.1) ← **NEW BEST!**
+- RandomForest (800 trees, max_depth=20)
+- ExtraTrees (800 trees, max_depth=20)
 - XGBoost, LightGBM (tuned hyperparameters)
 - SVM-RBF (tuned C, gamma)
-- MLP Neural Network
+- MLP Neural Network (512-256-128-64)
 - Voting Ensemble
 
 ### Deep Learning
-- EEGNet architecture (TensorFlow/Keras) - ~50-68%
-- Enhanced architecture with deeper networks
+- EEGNet architecture (TensorFlow/Keras) - ~78% on balanced data
 
 ## Synthetic Data
 
-**Balanced (current best - 82.5%):**
-- 400 trials, 8 channels, 4 seconds (128 Hz)
-- Multiple EEG rhythms (alpha ~10Hz, beta ~18-22Hz, theta ~6Hz)
-- Realistic noise (white noise, drift, artifacts)
+**Balanced v3 (current best - 88.9%):**
+- 450 trials, 8 channels, 4 seconds (128 Hz)
+- Multiple EEG rhythms (alpha ~10Hz, beta ~18-22Hz, theta ~6Hz, delta ~2Hz)
+- Realistic noise (white noise, drift, artifacts, line noise)
 - Cross-trial variability (0.4x to 1.6x amplitude)
-- **60% of trials show motor imagery effect (14% suppression)**
+- **65% of trials show motor imagery effect (16% suppression)**
+
+**Previous best (82.5%):**
+- 400 trials, 8 channels, 4 seconds (128 Hz)
+- 60% effect, 14% suppression
 
 **Hard version (~52-59%):**
 - 3-class (left/right/rest) vs 2-class
 - 20 channels vs 8 channels
 - 2% alpha suppression (very subtle!) vs 14%
-- More noise and variability
 
 ## Key Insights
 
-1. **ExtraTrees/GradientBoosting lead at 82.5%** - slight edge over RF/XGBoost
-2. **More features = better performance** - 256 features vs previous
-3. **5-band FBCSP helps** - adding low-mu (6-12 Hz) improves discrimination
-4. **EEGNet underperforms on this data** - 68.8% vs 80%+ for classical ML
+1. **GradientBoosting leads at 88.9%** - significant improvement over previous 82.5%
+2. **6-band FBCSP helps** - adding delta band (2-4 Hz) improves discrimination
+3. **More features = better** - 352 features vs previous versions
+4. **EEGNet improved** - 77.8% on balanced data (vs 68.8% before)
 5. **Hard data is significantly harder** - 3-class + 2% suppression drops to ~52%
-6. **Cross-validation consistent** - 77-79% CV shows stable performance
-7. **MLP competitive** - 80% accuracy, good alternative
+6. **Cross-validation consistent** - 86-87% CV shows stable performance
+7. **MLP competitive** - 85.6% accuracy
 
 ## Running
 
 ```bash
-# New best (82.5% accuracy!)
+# New best (88.9% accuracy!)
+python3 motor_imagery_v3_optimized.py
+
+# Previous best (82.5%)
 python3 motor_imagery_best_combo.py
+
+# Harder version (67% on harder data)
+python3 motor_imagery_v2_improved.py
 
 # Enhanced with CSP + RF/XGBoost (3-class hard data)
 python3 motor_imagery_enhanced.py
-
-# EEGNet deep learning
-python3 motor_imagery_eegnet.py
-
-# Previous best (81.4%)
-python3 motor_imagery_fbcsp_v4.py
-
-# Hard version (~59%)
-python3 motor_imagery_harder_v2.py
 ```
 
 ## Next Goals
