@@ -1,0 +1,3 @@
+EEGNet Version Results
+========================================
+EEGNet (TF): 50.00%
