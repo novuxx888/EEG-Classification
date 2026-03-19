@@ -6,82 +6,85 @@ Practice project for classifying EEG thought patterns (motor imagery).
 
 | Classifier | Accuracy |
 |------------|----------|
-| **RandomForest** | **81.4%** ← NEW RECORD! |
-| **XGBoost** | **81.4%** |
-| **LightGBM** | **81.4%** |
-| **EEGNet** | **81.4%** |
-| **Ensemble** | **81.4%** |
-| ExtraTrees | 80.0% |
-| GradientBoosting | 80.0% |
-| SVM-RBF | 74.3% |
-| LogisticRegression | 72.9% |
-| LDA | 54.3% |
+| **ExtraTrees** | **82.5%** ← NEW RECORD! |
+| **GradientBoosting** | **82.5%** |
+| MLP | 80.0% |
+| RandomForest | 78.8% |
+| LightGBM | 78.8% |
+| Ensemble | 78.8% |
+| XGBoost | 76.2% |
+| SVM-RBF | 75.0% |
+| LogisticRegression | 68.8% |
+| EEGNet | 68.8% |
+| LDA | 60.0% |
 
-**Cross-validation (5-fold):** RF: 80.3% ± 5.0%, SVM: 78.9% ± 4.5%, ET: 77.4% ± 6.2%, GB: 77.4% ± 4.3%
+**Cross-validation (5-fold):** RF: 79.2% ± 2.3%, ET: 77.8% ± 2.0%, XGBoost: 77.2% ± 0.9%
 
 ## Latest Scripts
 
-- `motor_imagery_fbcsp_v4.py` - **Best: 81.4% accuracy** ← Run this!
-- `motor_imagery_csp_v2.py` - Balanced-hard (78.6%)
-- `motor_imagery_csp_rf_xgb.py` - Hard data version (68%)
-- `motor_imagery_fbcsp_balanced.py` - Previous best (81%)
+- `motor_imagery_best_combo.py` - **Best: 82.5% accuracy** ← Run this!
+- `motor_imagery_harder_v2.py` - Hard data (40% effect, 10% suppression) - ~59%
+- `motor_imagery_fbcsp_v4.py` - Previous best (81.4%)
 
 ## Methods Implemented
 
 ### Features
-- **FBCSP (Filter Bank CSP)** - 4 bands: theta (4-8 Hz), mu (8-13 Hz), beta1 (13-20 Hz), beta2 (20-30 Hz)
-- **CSP (Common Spatial Patterns)** - mu + beta bands
-- Frequency band features (alpha, beta, theta, delta powers)
+- **FBCSP (Filter Bank CSP)** - 5 bands: theta (4-8 Hz), mu (8-13 Hz), low-mu (6-12 Hz), beta1 (13-20 Hz), beta2 (20-30 Hz)
+- **CSP (Common Spatial Patterns)** - with regularization
+- Frequency band features (alpha, beta, theta, delta powers + ratios)
 - Hemisphere asymmetry features
 - Spatial pattern features
-- Time domain features (mean, std, max, IQR)
+- Temporal segment features (5 segments)
+- Time domain features (mean, std, max, IQR, RMS)
 
 ### Classifiers
-- RandomForest (500 trees, max_depth=15) ← **NEW Best!**
+- ExtraTrees (700 trees, max_depth=20) ← **NEW Best!**
+- GradientBoosting (300 trees, max_depth=6)
+- RandomForest (700 trees, max_depth=20)
 - XGBoost, LightGBM (tuned hyperparameters)
 - SVM-RBF (tuned C, gamma)
-- ExtraTrees, Gradient Boosting
-- Logistic Regression, LDA
+- MLP Neural Network
 - Voting Ensemble
 
 ### Deep Learning
-- EEGNet architecture (TensorFlow/Keras) - **Now achieves 81.4%!**
-- Custom CNN with spatial filtering
+- EEGNet architecture (TensorFlow/Keras)
+- Enhanced architecture with deeper networks
 
 ## Synthetic Data
 
-Balanced difficulty (current best):
-- 350 trials, 8 channels, 3.5 seconds (128 Hz)
+**Balanced (current best - 82.5%):**
+- 400 trials, 8 channels, 4 seconds (128 Hz)
 - Multiple EEG rhythms (alpha ~10Hz, beta ~18-22Hz, theta ~6Hz)
 - Realistic noise (white noise, drift, artifacts)
 - Cross-trial variability (0.4x to 1.6x amplitude)
 - **60% of trials show motor imagery effect (14% suppression)**
 
-Hard version:
-- 50% trials show effect, only 12% suppression
-- More noise and variability (~68% accuracy)
+**Hard version (~59%):**
+- 40% trials show effect, 10% suppression
+- More noise and variability
+- Even tree-based methods struggle
 
 ## Key Insights
 
-1. **FBCSP with 4 bands is powerful** - theta, mu, beta1, beta2
-2. **RandomForest/XGBoost/LightGBM tied at 81.4%** - all perform equally well
-3. **EEGNet improved significantly** - now achieves 81.4% with deeper architecture
-4. **Ensemble matches best individual** - but no improvement over single models
-5. **Cross-validation shows ~77-80%** potential with variance
-6. **SVM-RBF dropped** - tree-based methods now outperform
-7. **Balanced data (60% effect)** is the sweet spot for this synthetic dataset
+1. **ExtraTrees/GradientBoosting lead at 82.5%** - slight edge over RF/XGBoost
+2. **More features = better performance** - 256 features vs previous
+3. **5-band FBCSP helps** - adding low-mu (6-12 Hz) improves discrimination
+4. **EEGNet underperforms on this data** - 68.8% vs 80%+ for classical ML
+5. **Hard data is significantly harder** - 40% effect / 10% suppression drops to ~59%
+6. **Cross-validation consistent** - 77-79% CV shows stable performance
+7. **MLP competitive** - 80% accuracy, good alternative
 
 ## Running
 
 ```bash
-# New best (81.4% accuracy!)
+# New best (82.5% accuracy!)
+python3 motor_imagery_best_combo.py
+
+# Previous best (81.4%)
 python3 motor_imagery_fbcsp_v4.py
 
-# Balanced version (78.6%)
-python3 motor_imagery_csp_v2.py
-
-# Hard version (68%)
-python3 motor_imagery_csp_rf_xgb.py
+# Hard version (~59%)
+python3 motor_imagery_harder_v2.py
 ```
 
 ## Next Goals
@@ -90,3 +93,4 @@ python3 motor_imagery_csp_rf_xgb.py
 - Add more channels for better spatial resolution
 - Try other deep learning architectures (ShallowConvNet, DeepConvNet)
 - Experiment with transfer learning
+- Explore Riemannian geometry approaches
